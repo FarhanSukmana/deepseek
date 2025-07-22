@@ -2,42 +2,46 @@ import { Webhook } from "svix";
 import connectDB from "@/config/db";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
+import { headers } from "next/headers";
 
-export async function POST(req){
-  const wh = new Webhook(process.env.SIGNING_SECRET)
-  const headerPayload = await headers()
+export async function POST(req) {
+  const wh = new Webhook(process.env.SIGNING_SECRET);
+  const headerPayload = headers();
+
   const svixHeaders = {
-    "svix-id" : headerPayload.get('svix-id'),
-    "svix-signature" : headerPayload.get('svix-signature'),
+    "svix-id": headerPayload.get("svix-id"),
+    "svix-signature": headerPayload.get("svix-signature"),
   };
 
   // Payload and Verify
-  const payload = await req.json()
-  const body = JSON.stringify(payload)
-  const {data, type} = wh.verify(body, svixHeaders)
+  const payload = await req.json();
+  const body = JSON.stringify(payload);
+  const { data, type } = wh.verify(body, svixHeaders);
 
   // Prepare the user data to be saved in the database
-  const userData = {
-    _id: data.id,
-    email: data.email_addresses[0].email_address,
-    name: `${data.firstname} ${data.lastname}`,
-    image: data.image_url,
-  };
-  await connectDB()
+const userData = {
+  _id: data.id,
+  email: data.email_addresses[0].email_address, // ✅ akses yang benar
+  name: `${data.first_name} ${data.last_name}`, // ✅ gunakan snake_case
+  image: data.image_url,
+};
+
+
+  await connectDB();
 
   switch (type) {
-    case 'user.created':
-      await User.create(userData)
+    case "user.created":
+      await User.create(userData);
       break;
-    case 'user.updated':
-      await User.findByIdAndUpdate(data.id, userData)
+    case "user.updated":
+      await User.findByIdAndUpdate(data.id, userData);
       break;
-    case 'user.deleted':
-      await User.findByIdAndDelete(data.id)
+    case "user.deleted":
+      await User.findByIdAndDelete(data.id);
       break;
-  
     default:
       break;
   }
-  return NextResponse.json({message:'Event Received'})
+
+  return NextResponse.json({ message: "Event Received" });
 }
