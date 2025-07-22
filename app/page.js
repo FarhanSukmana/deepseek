@@ -8,15 +8,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Bot, User } from "lucide-react";
 import { useEffect, useRef } from "react";
 import Header from "@/components/Header";
-import { useClerk, UserButton } from "@clerk/nextjs";
-
 
 export default function ChatBot() {
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat();
+    useChat({
+      api: "/api/chat/ai",
+    });
+
   const scrollAreaRef = useRef(null);
 
   useEffect(() => {
+    console.log("📨 All Messages:", messages);
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
@@ -24,10 +26,8 @@ export default function ChatBot() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      {/* Header */}
       <Header />
 
-      {/* Chat Messages */}
       <ScrollArea className="flex-1 px-4 py-6" ref={scrollAreaRef}>
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.length === 0 && (
@@ -107,7 +107,13 @@ export default function ChatBot() {
       {/* Input Area */}
       <div className="border-t bg-white px-4 py-4">
         <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+          <form
+            onSubmit={(e) => {
+              console.log("📤 Sending input:", input);
+              handleSubmit(e);
+            }}
+            className="flex gap-2"
+          >
             <Input
               value={input}
               onChange={handleInputChange}
@@ -125,7 +131,7 @@ export default function ChatBot() {
             </Button>
           </form>
           <p className="text-xs text-gray-500 text-center mt-2">
-            Coba-Coba pake modelnya Deepseek ~MFS
+            Menggunakan model Deepseek via OpenRouter ~MFS
           </p>
         </div>
       </div>
