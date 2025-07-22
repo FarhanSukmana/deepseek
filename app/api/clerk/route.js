@@ -18,10 +18,10 @@ export async function POST(req){
 
   // Prepare the user data to be saved in the database
   const userData = {
-    _id : data.id,
-    email : data.email_addresses[0].email_addresses,
-    name : `${data.firstname} ${data.lastname}`,
-    image : data.image_url,
+    _id: data.id,
+    email: data.email_addresses[0].email_address,
+    name: `${data.firstname} ${data.lastname}`,
+    image: data.image_url,
   };
   await connectDB()
 
