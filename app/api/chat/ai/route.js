@@ -18,7 +18,7 @@ export async function POST(req) {
         body: JSON.stringify({
           model: "deepseek/deepseek-r1-0528:free",
           messages,
-          max_tokens: 512,
+          max_tokens: 2048,
           temperature: 0.7,
         }),
       }
