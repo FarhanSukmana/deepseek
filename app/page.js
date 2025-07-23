@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Bot, User } from "lucide-react";
+import { Bot, User } from "lucide-react";
 import Header from "@/components/Header";
+import ChatInput from "@/components/ChatInput";
 
 export default function ChatBot() {
   const [messages, setMessages] = useState([]);
@@ -59,7 +57,6 @@ export default function ChatBot() {
             content: "Gagal mendapatkan balasan dari AI. Coba lagi nanti.",
           },
         ]);
-        console.error("❌ API Error:", data);
       }
     } catch (err) {
       console.error("❌ Fetch error:", err);
@@ -70,9 +67,12 @@ export default function ChatBot() {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header className='sticky' />
+      <Header className="sticky top-0 z-10 bg-white" />
 
-      <div className="flex-1 px-4 py-6 bg-gray-100" ref={scrollAreaRef}>
+      <div
+        className="flex-1 px-4 py-6 bg-gray-100 overflow-y-auto"
+        ref={scrollAreaRef}
+      >
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.length === 0 && (
             <div className="text-center py-12">
@@ -102,15 +102,13 @@ export default function ChatBot() {
               )}
 
               <div
-                className={`max-w-[70%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   message.role === "user"
                     ? "bg-blue-500 text-white"
                     : "bg-white border shadow-sm"
                 }`}
               >
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {message.content}
-                </p>
+                {message.content}
               </div>
 
               {message.role === "user" && (
@@ -132,15 +130,15 @@ export default function ChatBot() {
               </Avatar>
               <div className="bg-white border shadow-sm rounded-2xl px-4 py-3">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                   <div
                     className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                     style={{ animationDelay: "0.1s" }}
-                  ></div>
+                  />
                   <div
                     className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
                     style={{ animationDelay: "0.2s" }}
-                  ></div>
+                  />
                 </div>
               </div>
             </div>
@@ -151,23 +149,12 @@ export default function ChatBot() {
       {/* Input Area */}
       <div className="border-t bg-white px-4 py-4">
         <div className="max-w-3xl mx-auto">
-          <form onSubmit={sendMessage} className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ketik pesan Anda..."
-              className="flex-1 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-            <Button
-              type="submit"
-              size="icon"
-              className="rounded-full bg-blue-500 hover:bg-blue-600"
-              disabled={isLoading || !input.trim()}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+          <ChatInput
+            input={input}
+            setInput={setInput}
+            sendMessage={sendMessage}
+            isLoading={isLoading}
+          />
           <p className="text-xs text-gray-500 text-center mt-2">
             Menggunakan model Deepseek via OpenRouter ~MFS
           </p>
