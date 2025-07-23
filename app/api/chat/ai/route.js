@@ -53,12 +53,20 @@ export async function POST(req) {
     console.log("✅ AI Reply:", aiReply);
 
     // ✅ PERBAIKAN: Return langsung text content, bukan JSON object
-    return new Response(aiReply, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/plain",
-      },
-    });
+    return new Response(
+      JSON.stringify({
+        id: Date.now().toString(),
+        role: "assistant",
+        content: aiReply,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
   } catch (error) {
     console.error("❌ Error during fetch:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {

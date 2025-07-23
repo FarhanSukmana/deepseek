@@ -8,7 +8,7 @@ const Header = () => {
   const { isSignedIn } = useUser();
 
   return (
-    <div className="border-b bg-white px-6 py-4 flex justify-between items-center">
+    <div className="sticky top-0 z-50 border-b bg-white px-6 py-4 flex justify-between items-center">
       {/* Kiri - Logo dan Title */}
       <div className="flex items-center gap-3">
         <Avatar className="h-8 w-8 cursor-pointer">

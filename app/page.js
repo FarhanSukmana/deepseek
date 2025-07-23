@@ -1,34 +1,78 @@
 "use client";
 
-import { useChat } from "ai/react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Bot, User } from "lucide-react";
-import { useEffect, useRef } from "react";
 import Header from "@/components/Header";
 
 export default function ChatBot() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: "/api/chat/ai",
-    });
-
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef(null);
 
   useEffect(() => {
-    console.log("📨 All Messages:", messages);
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
 
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    const newMessages = [
+      ...messages,
+      { id: Date.now(), role: "user", content: input },
+    ];
+    setMessages(newMessages);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/chat/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: data.content,
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: "Gagal mendapatkan balasan dari AI. Coba lagi nanti.",
+          },
+        ]);
+        console.error("❌ API Error:", data);
+      }
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-      <Header />
+      <Header className='sticky' />
 
-      <ScrollArea className="flex-1 px-4 py-6" ref={scrollAreaRef}>
+      <div className="flex-1 px-4 py-6 bg-gray-100" ref={scrollAreaRef}>
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.length === 0 && (
             <div className="text-center py-12">
@@ -102,21 +146,15 @@ export default function ChatBot() {
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Input Area */}
       <div className="border-t bg-white px-4 py-4">
         <div className="max-w-3xl mx-auto">
-          <form
-            onSubmit={(e) => {
-              console.log("📤 Sending input:", input);
-              handleSubmit(e);
-            }}
-            className="flex gap-2"
-          >
+          <form onSubmit={sendMessage} className="flex gap-2">
             <Input
               value={input}
-              onChange={handleInputChange}
+              onChange={(e) => setInput(e.target.value)}
               placeholder="Ketik pesan Anda..."
               className="flex-1 rounded-full border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               disabled={isLoading}
